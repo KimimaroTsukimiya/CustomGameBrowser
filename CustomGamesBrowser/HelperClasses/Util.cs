@@ -9,38 +9,24 @@ using System.Threading.Tasks;
 namespace CustomGamesBrowser {
 	public static class Util {
 
-		public static bool DownloadRemoteImageFile(string uri, string fileName) {
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-			HttpWebResponse response;
-			try {
-				response = (HttpWebResponse)request.GetResponse();
-			} catch (Exception) {
-				return false;
-			}
+		public static string incrementVers(string vers, int add) {
+			//Debug.WriteLine("input: " + vers);
+			// check for new Vers
+			string[] numStrings = vers.Split('.');
+			int thousands = Int32.Parse(numStrings[0]) * 1000;
+			int hundreds = Int32.Parse(numStrings[1]) * 100;
+			int tens = Int32.Parse(numStrings[2]) * 10;
+			int ones = Int32.Parse(numStrings[3]);
+			int num = thousands + hundreds + tens + ones + add;
 
-			// Check that the remote file was found. The ContentType
-			// check is performed since a request for a non-existent
-			// image file might be redirected to a 404-page, which would
-			// yield the StatusCode "OK", even though the image was not
-			// found.
-			if ((response.StatusCode == HttpStatusCode.OK ||
-				response.StatusCode == HttpStatusCode.Moved ||
-				response.StatusCode == HttpStatusCode.Redirect) &&
-				response.ContentType.StartsWith("image", StringComparison.OrdinalIgnoreCase)) {
-
-				// if the remote file was found, download it
-				using (Stream inputStream = response.GetResponseStream())
-				using (Stream outputStream = File.OpenWrite(fileName)) {
-					byte[] buffer = new byte[4096];
-					int bytesRead;
-					do {
-						bytesRead = inputStream.Read(buffer, 0, buffer.Length);
-						outputStream.Write(buffer, 0, bytesRead);
-					} while (bytesRead != 0);
-				}
-				return true;
-			} else
-				return false;
+			//Debug.WriteLine("new num: " + num);
+			int newThousands = num / 1000;
+			int newHundreds = (num - newThousands * 1000) / 100;
+			int newTens = (num - newThousands * 1000 - newHundreds * 100) / 10;
+			int newOnes = num - newThousands * 1000 - newHundreds * 100 - newTens * 10;
+			string newVers = newThousands + "." + newHundreds + "." + newTens + "." + newOnes;
+			//Debug.WriteLine("New vers: " + newVers);
+			return newVers;
 		}
 
 		public static string getDotaDir() {

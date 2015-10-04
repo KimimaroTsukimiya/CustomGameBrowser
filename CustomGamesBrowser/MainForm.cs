@@ -4,14 +4,9 @@ using MetroFramework.Controls;
 using MetroFramework.Forms;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
@@ -23,10 +18,22 @@ namespace CustomGamesBrowser {
 		public int customGameCount;
 		public int totalPages = 1;
 		public int currPage = 1;
+		public string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+		Updater updater;
 
 		public MainForm() {
 
 			InitializeComponent();
+
+			this.FormClosed += (s, e) => {
+				Settings.Default.Save();
+			};
+
+			versionLink.Text = "v" + version;
+
+			// check for updates
+			updater = new Updater(this);
+			updater.checkForUpdates();
 
 			// get the dota dir
 			retrieveDotaDir();
@@ -129,6 +136,8 @@ namespace CustomGamesBrowser {
 					}
 					string p = fbd.SelectedPath;
 					dotaDir = p;
+				} else {
+					Settings.Default.Save();
 				}
 			}
 
@@ -190,6 +199,34 @@ namespace CustomGamesBrowser {
 				spinner.Visible = false;
 			}
 
+		}
+
+		private void openVPKToolStripMenuItem_Click(object sender, EventArgs e) {
+			ToolStripMenuItem item = (ToolStripMenuItem)sender;
+			var owner = (ContextMenuStrip)item.Owner;
+			MetroTile tile = (MetroTile)(owner.SourceControl);
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				if (cg.page == currPage && tile == cg.tile) {
+					Process.Start(cg.vpk);
+					break;
+				}
+			}
+		}
+
+		private void onTileClick(object sender, EventArgs e) {
+			var tile = (MetroTile)sender;
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				if (cg.page == currPage && tile == cg.tile) {
+					Process.Start(cg.url);
+					break;
+				}
+			}
+		}
+
+		private void versionLink_Click(object sender, EventArgs e) {
+			Process.Start("https://github.com/stephenfournier/CustomGameBrowser/releases/tag/v" + version);
 		}
 	}
 }
