@@ -29,6 +29,25 @@ namespace CustomGamesBrowser {
 			return newVers;
 		}
 
+		public static long GetDirectorySize(string dirPath) {
+			// 1.
+			// Get array of all file names.
+			string[] filePaths = Directory.GetFiles(dirPath, "*.*", SearchOption.AllDirectories);
+
+			// 2.
+			// Calculate total bytes of all files in a loop.
+			long totalBytes = 0;
+			foreach (string filePath in filePaths) {
+				// 3.
+				// Use FileInfo to get length of each file.
+				FileInfo info = new FileInfo(filePath);
+				totalBytes += info.Length;
+			}
+			// 4.
+			// Return total size
+			return totalBytes;
+		}
+
 		public static string getDotaDir() {
 			string dotaDir = "";
 			// Auto-find the dota path.

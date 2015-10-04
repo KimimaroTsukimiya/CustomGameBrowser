@@ -33,6 +33,7 @@ namespace CustomGamesBrowser {
 		public bool doneRetrieving;
 		public MainForm mainForm;
 		public int count;
+		public long size;
 
 		public CustomGame(MainForm mainForm, string installationDir) {
 			this.mainForm = mainForm;
@@ -147,6 +148,8 @@ namespace CustomGamesBrowser {
 				}
 			}
 
+			displaySize();
+
 			Timer timer = new Timer();
 			timer.Interval = 100;
 			timer.Tick += (s, e) => {
@@ -154,6 +157,22 @@ namespace CustomGamesBrowser {
 				tile.Refresh();
 			};
 			timer.Start();
+		}
+
+		private void displaySize() {
+			var sizeWorker = new BackgroundWorker();
+			string sizeStr = "";
+			sizeWorker.DoWork += (s, e) => {
+				double size = (Util.GetDirectorySize(installationDir) / 1024.0) / 1024.0;
+				size = Math.Round(size, 1);
+				sizeStr = size.ToString();
+			};
+
+			sizeWorker.RunWorkerCompleted += (s, e) => {
+				mainForm.metroToolTip1.SetToolTip(tile, "(" + sizeStr + " MB). Left-click to open the Steam Workshop page for this\n" +
+					"custom game. Right-click for more options.");
+			};
+			sizeWorker.RunWorkerAsync();
 		}
 	}
 }

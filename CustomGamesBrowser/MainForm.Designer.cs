@@ -24,6 +24,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.mt1 = new MetroFramework.Controls.MetroTile();
 			this.metroContextMenu1 = new MetroFramework.Controls.MetroContextMenu(this.components);
 			this.openVPKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -253,8 +254,8 @@
 			this.mt5.Text = "mt5";
 			this.mt5.Theme = MetroFramework.MetroThemeStyle.Dark;
 			this.mt5.TileImageAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.metroToolTip1.SetToolTip(this.mt5, "Left-click to open the Steam Workshop page for this\r\ncustom game. Right-click for" +
-        " more options.");
+			this.metroToolTip1.SetToolTip(this.mt5, "Left-click to open the Steam Workshop page for thistyutyu\r\ncustom game. Right-cli" +
+        "ck for more options.");
 			this.mt5.UseSelectable = true;
 			this.mt5.Visible = false;
 			this.mt5.Click += new System.EventHandler(this.onTileClick);
@@ -807,19 +808,22 @@
 			// 
 			// metroToolTip1
 			// 
+			this.metroToolTip1.AutoPopDelay = 5000;
+			this.metroToolTip1.InitialDelay = 200;
+			this.metroToolTip1.ReshowDelay = 100;
 			this.metroToolTip1.Style = MetroFramework.MetroColorStyle.Blue;
 			this.metroToolTip1.StyleManager = null;
-			this.metroToolTip1.Theme = MetroFramework.MetroThemeStyle.Light;
+			this.metroToolTip1.Theme = MetroFramework.MetroThemeStyle.Default;
 			// 
 			// versionLink
 			// 
 			this.versionLink.Cursor = System.Windows.Forms.Cursors.Hand;
-			this.versionLink.Location = new System.Drawing.Point(544, 28);
+			this.versionLink.Location = new System.Drawing.Point(276, 30);
 			this.versionLink.Name = "versionLink";
 			this.versionLink.Size = new System.Drawing.Size(75, 23);
 			this.versionLink.TabIndex = 39;
 			this.versionLink.Text = "metroLink1";
-			this.metroToolTip1.SetToolTip(this.versionLink, "View the changelog!");
+			this.versionLink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.versionLink.UseSelectable = true;
 			this.versionLink.Click += new System.EventHandler(this.versionLink_Click);
 			// 
@@ -852,10 +856,11 @@
 			this.Controls.Add(this.mt3);
 			this.Controls.Add(this.mt2);
 			this.Controls.Add(this.mt1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.Style = MetroFramework.MetroColorStyle.Teal;
+			this.Style = MetroFramework.MetroColorStyle.Red;
 			this.Text = "Installed Custom Games";
 			this.mt1.ResumeLayout(false);
 			this.metroContextMenu1.ResumeLayout(false);
@@ -930,8 +935,8 @@
 		public MetroFramework.Controls.MetroRadioButton dummyBtn;
 		private MetroFramework.Controls.MetroContextMenu metroContextMenu1;
 		private System.Windows.Forms.ToolStripMenuItem openVPKToolStripMenuItem;
-		private MetroFramework.Components.MetroToolTip metroToolTip1;
 		private MetroFramework.Controls.MetroLink versionLink;
+		public MetroFramework.Components.MetroToolTip metroToolTip1;
 	}
 }
 

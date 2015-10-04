@@ -23,6 +23,7 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpdateInfoForm));
 			this.dontUpdateBtn = new MetroFramework.Controls.MetroButton();
 			this.updateBtn = new MetroFramework.Controls.MetroButton();
 			this.progressLabel = new MetroFramework.Controls.MetroLabel();
@@ -131,11 +132,13 @@
 			this.Controls.Add(this.progressLabel);
 			this.Controls.Add(this.metroProgressBar1);
 			this.Controls.Add(this.changelogTextBox);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "UpdateInfoForm";
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+			this.Style = MetroFramework.MetroColorStyle.Teal;
 			this.Text = "Update Available!";
 			this.ResumeLayout(false);
 			this.PerformLayout();
