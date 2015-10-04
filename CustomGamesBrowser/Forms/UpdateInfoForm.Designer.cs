@@ -136,6 +136,7 @@
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "UpdateInfoForm";
+			this.Resizable = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Style = MetroFramework.MetroColorStyle.Teal;

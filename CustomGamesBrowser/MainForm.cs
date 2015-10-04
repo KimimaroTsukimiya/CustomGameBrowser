@@ -5,6 +5,7 @@ using MetroFramework.Forms;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
@@ -20,10 +21,13 @@ namespace CustomGamesBrowser {
 		public int currPage = 1;
 		public string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 		Updater updater;
+		public MetroPanel panel;
 
 		public MainForm() {
 
 			InitializeComponent();
+
+			this.panel = metroPanel1;
 
 			this.FormClosed += (s, e) => {
 				Settings.Default.Save();
@@ -56,15 +60,17 @@ namespace CustomGamesBrowser {
 			timer.Interval = 100;
 			timer.Tick += (s, e) => {
 				timer.Stop();
-				initBrowser();
+				initCustomGameBrowser();
 			};
 			timer.Start();
 		}
 
-		private void initBrowser() {
-
+		private void initCustomGameBrowser() {
+			Random random = new Random();
 			var customGameDirs = Directory.GetDirectories(customGamesDir);
 			int count = 1;
+			int mtX = 4;
+			int mtY = 4;
 			foreach (var customGameDir in customGameDirs) {
 				var customGame = new CustomGame(this, customGameDir);
 
@@ -72,13 +78,46 @@ namespace CustomGamesBrowser {
 					continue;
 				}
 
-				if (count > NUM_TILES) {
-					totalPages++;
-					count = 1;
+				// Setup the tile
+				MetroTile mt = new MetroTile();
+				mt.Parent = panel;
+				mt.Size = new Size(128, 116);
+				mt.Location = new Point(mtX, mtY);
+				mt.ContextMenuStrip = metroContextMenu1;
+				mt.Style = (MetroColorStyle)random.Next(3, 14);
+				mt.Visible = false;
+				metroToolTip1.Theme = MetroThemeStyle.Light;
+				mt.Click += (s, e) => {
+					foreach (var kv in customGames) {
+						var cg = kv.Value;
+						if (mt == cg.tile) {
+							Process.Start(cg.url);
+							break;
+						}
+					}
+				};
+
+				// setup the spinner
+				MetroProgressSpinner ps = new MetroProgressSpinner();
+				ps.Parent = mt;
+				ps.Size = new Size(38, 38);
+				ps.Style = mt.Style;
+				ps.Value = 70;
+				ps.Location = new Point(44, 38);
+				ps.Visible = false;
+
+				mtX += 132;
+
+				if (count % 5 == 0) {
+					// new row
+					mtX = 4;
+					mtY += 120;
 				}
-					
-				var tile = (MetroTile)Controls["mt" + count];
-				var spinner = (MetroProgressSpinner)tile.Controls["ps" + count];
+
+				panel.Controls.Add(mt);
+
+				var tile = mt;
+				var spinner = ps;
 				customGame.defaultStyle = tile.Style;
 
 				customGame.tile = tile;
@@ -88,10 +127,6 @@ namespace CustomGamesBrowser {
 				customGame.retrieveWorkshopImage();
 				Debug.WriteLine("Initializing: " + customGame.name);
 				count++;
-			}
-
-			if (totalPages > 1) {
-				nextBtn.Visible = true;
 			}
 
 			changePage(1);
@@ -153,35 +188,7 @@ namespace CustomGamesBrowser {
 			}*/
 		}
 
-		private void nextBtn_Click(object sender, EventArgs e) {
-			fixButton();
-
-			currPage++;
-			if (currPage == totalPages) {
-				nextBtn.Visible = false;
-			}
-			if (currPage == 2) {
-				backBtn.Visible = true;
-			}
-			changePage(currPage);
-		}
-
-		private void backBtn_Click(object sender, EventArgs e) {
-			fixButton();
-
-			currPage--;
-			if (currPage == 1) {
-				backBtn.Visible = false;
-			}
-			if (currPage == totalPages-1) {
-				nextBtn.Visible = true;
-			}
-			changePage(currPage);
-		}
-
 		private void changePage(int currPage) {
-			//for
-
 			int count = 1;
 			foreach (var kv in customGames) {
 				var cg = kv.Value;
@@ -193,7 +200,7 @@ namespace CustomGamesBrowser {
 
 			}
 			for (int i = count; i <= NUM_TILES; i++) {
-				var tile = (MetroTile)Controls["mt" + i];
+				var tile = (MetroTile)panel.Controls["mt" + i];
 				var spinner = (MetroProgressSpinner)tile.Controls["ps" + i];
 				tile.Visible = false;
 				spinner.Visible = false;
@@ -209,17 +216,6 @@ namespace CustomGamesBrowser {
 				var cg = kv.Value;
 				if (cg.page == currPage && tile == cg.tile) {
 					Process.Start(cg.vpk);
-					break;
-				}
-			}
-		}
-
-		private void onTileClick(object sender, EventArgs e) {
-			var tile = (MetroTile)sender;
-			foreach (var kv in customGames) {
-				var cg = kv.Value;
-				if (cg.page == currPage && tile == cg.tile) {
-					Process.Start(cg.url);
 					break;
 				}
 			}
