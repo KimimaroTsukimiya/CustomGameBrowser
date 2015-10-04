@@ -23,4 +23,5 @@ I wanted a more "personal" way of interacting with my installed custom games, so
 [GNU General Public License v2.0](https://github.com/stephenfournier/CustomGameBrowser/blob/master/LICENSE)
 
 ## Special Thanks
-CustomGameBrowser utilizes the lovely [WinForms Metro Framework](https://github.com/dennismagno/metroframework-modern-ui/) for its GUI controls.
+* CustomGameBrowser utilizes the lovely [WinForms Metro Framework](https://github.com/dennismagno/metroframework-modern-ui/) for its GUI controls.
+* KVLib by RoyAwesome
