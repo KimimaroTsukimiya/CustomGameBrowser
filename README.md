@@ -17,6 +17,8 @@ I wanted a more "personal" way of interacting with my installed custom games, so
 * Easily view the total amount of space your custom games are taking up at the bottom of the UI.
 * ?? [Have an idea? Let me know here!](https://github.com/stephenfournier/CustomGameBrowser/issues/new)
 
+[Please report bugs here.](https://github.com/stephenfournier/CustomGameBrowser/issues/new)
+
 ## License
 [GNU General Public License v2.0](https://github.com/stephenfournier/CustomGameBrowser/blob/master/LICENSE)
 
