@@ -28,18 +28,22 @@
 			this.metroContextMenu1 = new MetroFramework.Controls.MetroContextMenu(this.components);
 			this.openVPKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.dummyBtn = new MetroFramework.Controls.MetroRadioButton();
-			this.metroToolTip1 = new MetroFramework.Components.MetroToolTip();
 			this.versionLink = new MetroFramework.Controls.MetroLink();
-			this.metroPanel1 = new MetroFramework.Controls.MetroPanel();
+			this.panel1 = new MetroFramework.Controls.MetroPanel();
+			this.htmlToolTip1 = new MetroFramework.Drawing.Html.HtmlToolTip();
+			this.refreshBtn = new System.Windows.Forms.PictureBox();
+			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.metroContextMenu1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.refreshBtn)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// metroContextMenu1
 			// 
 			this.metroContextMenu1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openVPKToolStripMenuItem});
+            this.openVPKToolStripMenuItem,
+            this.deleteToolStripMenuItem});
 			this.metroContextMenu1.Name = "metroContextMenu1";
-			this.metroContextMenu1.Size = new System.Drawing.Size(128, 26);
+			this.metroContextMenu1.Size = new System.Drawing.Size(128, 48);
 			// 
 			// openVPKToolStripMenuItem
 			// 
@@ -60,49 +64,72 @@
 			this.dummyBtn.UseSelectable = true;
 			this.dummyBtn.Visible = false;
 			// 
-			// metroToolTip1
-			// 
-			this.metroToolTip1.AutoPopDelay = 5000;
-			this.metroToolTip1.InitialDelay = 200;
-			this.metroToolTip1.ReshowDelay = 100;
-			this.metroToolTip1.Style = MetroFramework.MetroColorStyle.Blue;
-			this.metroToolTip1.StyleManager = null;
-			this.metroToolTip1.Theme = MetroFramework.MetroThemeStyle.Default;
-			// 
 			// versionLink
 			// 
 			this.versionLink.Cursor = System.Windows.Forms.Cursors.Hand;
-			this.versionLink.Location = new System.Drawing.Point(276, 30);
+			this.versionLink.Location = new System.Drawing.Point(272, 28);
 			this.versionLink.Name = "versionLink";
-			this.versionLink.Size = new System.Drawing.Size(75, 23);
+			this.versionLink.Size = new System.Drawing.Size(44, 20);
 			this.versionLink.TabIndex = 39;
-			this.versionLink.Text = "metroLink1";
+			this.versionLink.Text = "v1.0.0";
 			this.versionLink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.htmlToolTip1.SetToolTip(this.versionLink, "Opens changelog on GitHub");
 			this.versionLink.UseSelectable = true;
 			this.versionLink.Click += new System.EventHandler(this.versionLink_Click);
 			// 
-			// metroPanel1
+			// panel1
 			// 
-			this.metroPanel1.AutoScroll = true;
-			this.metroPanel1.HorizontalScrollbar = true;
-			this.metroPanel1.HorizontalScrollbarBarColor = true;
-			this.metroPanel1.HorizontalScrollbarHighlightOnWheel = false;
-			this.metroPanel1.HorizontalScrollbarSize = 10;
-			this.metroPanel1.Location = new System.Drawing.Point(8, 52);
-			this.metroPanel1.Name = "metroPanel1";
-			this.metroPanel1.Size = new System.Drawing.Size(676, 620);
-			this.metroPanel1.TabIndex = 40;
-			this.metroPanel1.VerticalScrollbar = true;
-			this.metroPanel1.VerticalScrollbarBarColor = true;
-			this.metroPanel1.VerticalScrollbarHighlightOnWheel = true;
-			this.metroPanel1.VerticalScrollbarSize = 10;
+			this.panel1.AutoScroll = true;
+			this.panel1.HorizontalScrollbar = true;
+			this.panel1.HorizontalScrollbarBarColor = true;
+			this.panel1.HorizontalScrollbarHighlightOnWheel = false;
+			this.panel1.HorizontalScrollbarSize = 10;
+			this.panel1.Location = new System.Drawing.Point(8, 52);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(676, 620);
+			this.panel1.TabIndex = 40;
+			this.panel1.Theme = MetroFramework.MetroThemeStyle.Light;
+			this.panel1.VerticalScrollbar = true;
+			this.panel1.VerticalScrollbarBarColor = true;
+			this.panel1.VerticalScrollbarHighlightOnWheel = true;
+			this.panel1.VerticalScrollbarSize = 10;
+			// 
+			// htmlToolTip1
+			// 
+			this.htmlToolTip1.AutoPopDelay = 5000;
+			this.htmlToolTip1.InitialDelay = 200;
+			this.htmlToolTip1.OwnerDraw = true;
+			this.htmlToolTip1.ReshowDelay = 100;
+			// 
+			// refreshBtn
+			// 
+			this.refreshBtn.Cursor = System.Windows.Forms.Cursors.Hand;
+			this.refreshBtn.Image = ((System.Drawing.Image)(resources.GetObject("refreshBtn.Image")));
+			this.refreshBtn.Location = new System.Drawing.Point(318, 28);
+			this.refreshBtn.Name = "refreshBtn";
+			this.refreshBtn.Size = new System.Drawing.Size(20, 20);
+			this.refreshBtn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.refreshBtn.TabIndex = 42;
+			this.refreshBtn.TabStop = false;
+			this.htmlToolTip1.SetToolTip(this.refreshBtn, "Refresh");
+			this.refreshBtn.Click += new System.EventHandler(this.refreshBtn_Click);
+			// 
+			// deleteToolStripMenuItem
+			// 
+			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+			this.deleteToolStripMenuItem.Text = "Delete";
+			this.deleteToolStripMenuItem.ToolTipText = "Deletes this custom game from your computer.\r\nNote: This is pointless if you\'re s" +
+    "till subscribed to it.";
+			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(691, 686);
-			this.Controls.Add(this.metroPanel1);
+			this.Controls.Add(this.refreshBtn);
+			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.versionLink);
 			this.Controls.Add(this.dummyBtn);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -113,6 +140,7 @@
 			this.Style = MetroFramework.MetroColorStyle.Red;
 			this.Text = "Installed Custom Games";
 			this.metroContextMenu1.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.refreshBtn)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -123,8 +151,10 @@
 		private MetroFramework.Controls.MetroContextMenu metroContextMenu1;
 		private System.Windows.Forms.ToolStripMenuItem openVPKToolStripMenuItem;
 		private MetroFramework.Controls.MetroLink versionLink;
-		public MetroFramework.Components.MetroToolTip metroToolTip1;
-		private MetroFramework.Controls.MetroPanel metroPanel1;
+		private MetroFramework.Controls.MetroPanel panel1;
+		public MetroFramework.Drawing.Html.HtmlToolTip htmlToolTip1;
+		private System.Windows.Forms.PictureBox refreshBtn;
+		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
 	}
 }
 

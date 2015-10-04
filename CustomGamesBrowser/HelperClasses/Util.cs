@@ -10,22 +10,32 @@ namespace CustomGamesBrowser {
 	public static class Util {
 
 		public static string incrementVers(string vers, int add) {
-			//Debug.WriteLine("input: " + vers);
 			// check for new Vers
-			string[] numStrings = vers.Split('.');
-			int thousands = Int32.Parse(numStrings[0]) * 1000;
-			int hundreds = Int32.Parse(numStrings[1]) * 100;
-			int tens = Int32.Parse(numStrings[2]) * 10;
-			int ones = Int32.Parse(numStrings[3]);
-			int num = thousands + hundreds + tens + ones + add;
+			string[] numStrs = vers.Split('.');
+			string newVers = "";
+			if (numStrs.Length == 4) {
+				int thousands = Int32.Parse(numStrs[0]) * 1000;
+				int hundreds = Int32.Parse(numStrs[1]) * 100;
+				int tens = Int32.Parse(numStrs[2]) * 10;
+				int ones = Int32.Parse(numStrs[3]);
+				int num = thousands + hundreds + tens + ones + add;
 
-			//Debug.WriteLine("new num: " + num);
-			int newThousands = num / 1000;
-			int newHundreds = (num - newThousands * 1000) / 100;
-			int newTens = (num - newThousands * 1000 - newHundreds * 100) / 10;
-			int newOnes = num - newThousands * 1000 - newHundreds * 100 - newTens * 10;
-			string newVers = newThousands + "." + newHundreds + "." + newTens + "." + newOnes;
-			//Debug.WriteLine("New vers: " + newVers);
+				int newThousands = num / 1000;
+				int newHundreds = (num - newThousands * 1000) / 100;
+				int newTens = (num - newThousands * 1000 - newHundreds * 100) / 10;
+				int newOnes = num - newThousands * 1000 - newHundreds * 100 - newTens * 10;
+				newVers = newThousands + "." + newHundreds + "." + newTens + "." + newOnes;
+			} else if (numStrs.Length == 3) {
+				int hundreds = Int32.Parse(numStrs[0]) * 100;
+				int tens = Int32.Parse(numStrs[1]) * 10;
+				int ones = Int32.Parse(numStrs[2]);
+				int num = hundreds + tens + ones + add;
+
+				int newHundreds = num / 100;
+				int newTens = (num - newHundreds * 100) / 10;
+				int newOnes = num - newHundreds * 100 - newTens * 10;
+				newVers = newHundreds + "." + newTens + "." + newOnes;
+			}
 			return newVers;
 		}
 

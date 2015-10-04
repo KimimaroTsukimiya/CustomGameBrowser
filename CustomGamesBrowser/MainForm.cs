@@ -1,4 +1,5 @@
 ﻿using CustomGamesBrowser.Properties;
+using KVLib;
 using MetroFramework;
 using MetroFramework.Controls;
 using MetroFramework.Forms;
@@ -15,25 +16,28 @@ namespace CustomGamesBrowser {
 		public string dotaDir = "";
 		public string customGamesDir = "";
 		public Dictionary<string, CustomGame> customGames = new Dictionary<string, CustomGame>();
+		public Dictionary<string, string> installedAddonSettings = new Dictionary<string, string>();
 		public static int NUM_TILES = 20;
 		public int customGameCount;
 		public int totalPages = 1;
 		public int currPage = 1;
 		public string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 		Updater updater;
-		public MetroPanel panel;
 
 		public MainForm() {
 
 			InitializeComponent();
 
-			this.panel = metroPanel1;
+			// change version so it matches our specs
+			version = version.Substring(0, version.LastIndexOf('.'));
+			versionLink.Text = "v" + version;
 
 			this.FormClosed += (s, e) => {
-				Settings.Default.Save();
+				serializeSettings();
 			};
 
-			versionLink.Text = "v" + version;
+			//metroToolTip1.theme
+			//htmlToolTip1.
 
 			// check for updates
 			updater = new Updater(this);
@@ -60,17 +64,28 @@ namespace CustomGamesBrowser {
 			timer.Interval = 100;
 			timer.Tick += (s, e) => {
 				timer.Stop();
+				retrieveCustomGames();
+				deserializeSettings();
 				initCustomGameBrowser();
 			};
 			timer.Start();
 		}
 
-		private void initCustomGameBrowser() {
-			Random random = new Random();
+		private void serializeSettings() {
+			var root = new KeyValue("InstalledAddons");
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				cg.serializeSettings();
+				root.AddChild(cg.addonKV);
+			}
+			Settings.Default.InstalledAddonsKV = root.ToString();
+
+			Settings.Default.Save();
+		}
+
+		private void retrieveCustomGames() {
+			customGames.Clear();
 			var customGameDirs = Directory.GetDirectories(customGamesDir);
-			int count = 1;
-			int mtX = 4;
-			int mtY = 4;
 			foreach (var customGameDir in customGameDirs) {
 				var customGame = new CustomGame(this, customGameDir);
 
@@ -78,18 +93,55 @@ namespace CustomGamesBrowser {
 					continue;
 				}
 
+				customGames.Add(customGame.workshopID, customGame);
+			}
+		}
+
+		private void deserializeSettings() {
+			var installedAddonsKV = Settings.Default.InstalledAddonsKV;
+			if (installedAddonsKV == null || installedAddonsKV == "") {
+				return;
+			}
+			var root = KVParser.KV1.Parse(installedAddonsKV);
+			foreach (var kv in root.Children) {
+				if (customGames.ContainsKey(kv.Key)) {
+					customGames[kv.Key].deserializeSettings(kv);
+				}
+			}
+
+		}
+
+		private void initCustomGameBrowser() {
+			Random random = new Random();
+			HashSet<MetroColorStyle> usedStyles = new HashSet<MetroColorStyle>();
+			int count = 1;
+			int mtX = 4;
+			int mtY = 4;
+			foreach (var kv in customGames) {
+				var customGame = kv.Value;
 				// Setup the tile
 				MetroTile mt = new MetroTile();
-				mt.Parent = panel;
+				mt.Parent = panel1;
 				mt.Size = new Size(128, 116);
 				mt.Location = new Point(mtX, mtY);
 				mt.ContextMenuStrip = metroContextMenu1;
-				mt.Style = (MetroColorStyle)random.Next(3, 14);
+
+				// grab a random style
+				if (usedStyles.Count == 11) {
+					usedStyles.Clear();
+				}
+				var style = (MetroColorStyle)random.Next(3, 14);
+				while (usedStyles.Contains(style)) {
+					style = (MetroColorStyle)random.Next(3, 14);
+				}
+				usedStyles.Add(style);
+				mt.Style = style;
+
 				mt.Visible = false;
-				metroToolTip1.Theme = MetroThemeStyle.Light;
+				mt.Theme = MetroThemeStyle.Light;
 				mt.Click += (s, e) => {
-					foreach (var kv in customGames) {
-						var cg = kv.Value;
+					foreach (var kv2 in customGames) {
+						var cg = kv2.Value;
 						if (mt == cg.tile) {
 							Process.Start(cg.url);
 							break;
@@ -114,7 +166,7 @@ namespace CustomGamesBrowser {
 					mtY += 120;
 				}
 
-				panel.Controls.Add(mt);
+				panel1.Controls.Add(mt);
 
 				var tile = mt;
 				var spinner = ps;
@@ -123,9 +175,11 @@ namespace CustomGamesBrowser {
 				customGame.tile = tile;
 				customGame.spinner = spinner;
 				customGame.page = totalPages;
-				customGames.Add(customGame.workshopID, customGame);
-				customGame.retrieveWorkshopImage();
-				Debug.WriteLine("Initializing: " + customGame.name);
+				try {
+					customGame.retrieveWorkshopImage();
+				} catch (Exception ex) {
+					customGame.initTile();
+				}
 				count++;
 			}
 
@@ -200,7 +254,7 @@ namespace CustomGamesBrowser {
 
 			}
 			for (int i = count; i <= NUM_TILES; i++) {
-				var tile = (MetroTile)panel.Controls["mt" + i];
+				var tile = (MetroTile)panel1.Controls["mt" + i];
 				var spinner = (MetroProgressSpinner)tile.Controls["ps" + i];
 				tile.Visible = false;
 				spinner.Visible = false;
@@ -223,6 +277,45 @@ namespace CustomGamesBrowser {
 
 		private void versionLink_Click(object sender, EventArgs e) {
 			Process.Start("https://github.com/stephenfournier/CustomGameBrowser/releases/tag/v" + version);
+		}
+
+		private void refreshBtn_Click(object sender, EventArgs e) {
+			panel1.AutoScrollPosition = new Point(0, 0);
+			//panel1.AutoScrollPosition.
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				cg.tile.Dispose();
+				cg.spinner.Dispose();
+			}
+			retrieveCustomGames();
+			deserializeSettings();
+			initCustomGameBrowser();
+		}
+
+		private void deleteToolStripMenuItem_Click(object sender, EventArgs e) {
+			ToolStripMenuItem item = (ToolStripMenuItem)sender;
+			var owner = (ContextMenuStrip)item.Owner;
+			MetroTile tile = (MetroTile)(owner.SourceControl);
+			CustomGame customGame = null;
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				if (cg.page == currPage && tile == cg.tile) {
+					customGame = cg;
+					break;
+				}
+			}
+			var dr = MetroMessageBox.Show(this,
+				"Are you sure you want to delete " + customGame.name + " from this computer?",
+				"Confirmation",
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning);
+			if (dr != DialogResult.Yes) {
+				return;
+			}
+			if (Directory.Exists(customGame.installationDir)) {
+				Directory.Delete(customGame.installationDir, true);
+			}
+			refreshBtn_Click(null, null);
 		}
 	}
 }

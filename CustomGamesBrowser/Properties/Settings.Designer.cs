@@ -46,5 +46,17 @@ namespace CustomGamesBrowser.Properties {
                 this["UpdateRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string InstalledAddonsKV {
+            get {
+                return ((string)(this["InstalledAddonsKV"]));
+            }
+            set {
+                this["InstalledAddonsKV"] = value;
+            }
+        }
     }
 }

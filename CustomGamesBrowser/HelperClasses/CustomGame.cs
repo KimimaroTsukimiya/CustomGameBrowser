@@ -1,12 +1,9 @@
 ﻿using MetroFramework.Controls;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using KVLib;
 using MetroFramework;
 using System.Net;
@@ -34,6 +31,10 @@ namespace CustomGamesBrowser {
 		public MainForm mainForm;
 		public int count;
 		public long size;
+
+		// settings
+		public int WorkshopImgSizeOnWeb;
+		public KeyValue addonKV;
 
 		public CustomGame(MainForm mainForm, string installationDir) {
 			this.mainForm = mainForm;
@@ -67,7 +68,7 @@ namespace CustomGamesBrowser {
 		}
 
 		public void retrieveWorkshopImage() {
-			if (File.Exists(workshopImagePath) && new FileInfo(workshopImagePath).Length > 2000) {
+			if (File.Exists(workshopImagePath) && new FileInfo(workshopImagePath).Length > 50) {
 				workshopImage = (Image)new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
 				initTile();
 			}
@@ -85,21 +86,32 @@ namespace CustomGamesBrowser {
 						if (line.StartsWith(signal)) {
 							var imgLink = line.Substring(signal.Length);
 							imgLink = imgLink.Substring(0, imgLink.IndexOf("/?") + 1);
-							var stream = wc.OpenRead(imgLink);
-							var totalBytes = Convert.ToInt64(wc.ResponseHeaders["Content-Length"]);
+
+							long totalBytes = 0;
+							using (var stream = wc.OpenRead(imgLink)) {
+								totalBytes = Convert.ToInt64(wc.ResponseHeaders["Content-Length"]);
+							}
+
 							bool download = false;
 							if (File.Exists(workshopImagePath)) {
-								if (totalBytes != new FileInfo(workshopImagePath).Length) {
-									Debug.WriteLine("Image not same size. Downloading.");
+								if (totalBytes != WorkshopImgSizeOnWeb) {
 									File.Delete(workshopImagePath);
 									download = true;
+								} else {
+									//Debug.WriteLine("Same image. Not downloading image for " + name);
 								}
 							} else {
 								download = true;
 							}
-							stream.Close();
 							if (download) {
-								wc.DownloadFile(imgLink, workshopImagePath);
+								var byteArr = wc.DownloadData(imgLink);
+								using (MemoryStream ms = new MemoryStream(byteArr)) {
+									var im = Image.FromStream(ms);
+									im = new Bitmap(im, new Size(128, 128));
+									im.Save(workshopImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+									WorkshopImgSizeOnWeb = byteArr.Length;
+									//Debug.WriteLine("Saved image for: " + workshopImagePath);
+								}
 							}
 							break;
 						}
@@ -113,11 +125,10 @@ namespace CustomGamesBrowser {
 				spinner.Visible = false;
 
 				if (File.Exists(workshopImagePath)) {
-					// if it's not greater than 2KB, something messed up...
-					if (!(new FileInfo(workshopImagePath).Length > 2000)) {
+					if (!(new FileInfo(workshopImagePath).Length > 50)) {
 						File.Delete(workshopImagePath);
 					} else {
-						workshopImage = (Image)new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
+						workshopImage = new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
 						initTile();
 					}
 				}
@@ -126,6 +137,20 @@ namespace CustomGamesBrowser {
 			//bw.
 			bw.RunWorkerAsync();
 		}
+
+		internal void deserializeSettings(KeyValue root) {
+			foreach (var kv in root.Children) {
+				if (kv.Key == "WorkshopImgSizeOnWeb") {
+					WorkshopImgSizeOnWeb = kv.GetInt();
+                }
+			}
+		}
+		internal void serializeSettings() {
+			addonKV = new KeyValue(workshopID);
+			if (WorkshopImgSizeOnWeb != 0) {
+				addonKV.AddChild(new KeyValue("WorkshopImgSizeOnWeb").Set(WorkshopImgSizeOnWeb));
+			}
+        }
 
 		internal void initTile() {
 			if (mainForm.currPage != page) {
@@ -169,8 +194,7 @@ namespace CustomGamesBrowser {
 			};
 
 			sizeWorker.RunWorkerCompleted += (s, e) => {
-				mainForm.metroToolTip1.SetToolTip(tile, "(" + sizeStr + " MB). Left-click to open the Steam Workshop page for this\n" +
-					"custom game. Right-click for more options.");
+				mainForm.htmlToolTip1.SetToolTip(tile, "(" + sizeStr + " MB). Left-click to open " + name + "'s Workshop page. Right-click for more options.");
 			};
 			sizeWorker.RunWorkerAsync();
 		}
