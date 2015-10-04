@@ -16,16 +16,11 @@ namespace CustomGamesBrowser {
 		public string dotaDir = "";
 		public string customGamesDir = "";
 		public Dictionary<string, CustomGame> customGames = new Dictionary<string, CustomGame>();
-		public Dictionary<string, string> installedAddonSettings = new Dictionary<string, string>();
-		public static int NUM_TILES = 20;
 		public int customGameCount;
-		public int totalPages = 1;
-		public int currPage = 1;
 		public string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 		Updater updater;
 
 		public MainForm() {
-
 			InitializeComponent();
 
 			// change version so it matches our specs
@@ -35,9 +30,6 @@ namespace CustomGamesBrowser {
 			this.FormClosed += (s, e) => {
 				serializeSettings();
 			};
-
-			//metroToolTip1.theme
-			//htmlToolTip1.
 
 			// check for updates
 			updater = new Updater(this);
@@ -69,6 +61,20 @@ namespace CustomGamesBrowser {
 				initCustomGameBrowser();
 			};
 			timer.Start();
+
+			Timer sizeCalcTimer = new Timer();
+			sizeCalcTimer.Interval = 200;
+			sizeCalcTimer.Tick += (s, e) => {
+				double size = 0;
+				foreach (var kv in customGames) {
+					var cg = kv.Value;
+					size += cg.size;
+				}
+
+				totalSizeLabel1.Text = "Total size: " + size.ToString() + " MB";
+			};
+			sizeCalcTimer.Start();
+
 		}
 
 		private void serializeSettings() {
@@ -112,31 +118,22 @@ namespace CustomGamesBrowser {
 		}
 
 		private void initCustomGameBrowser() {
+			totalSizeLabel1.Text = "Total size: 0 MB";
+
 			Random random = new Random();
-			HashSet<MetroColorStyle> usedStyles = new HashSet<MetroColorStyle>();
 			int count = 1;
 			int mtX = 4;
 			int mtY = 4;
 			foreach (var kv in customGames) {
 				var customGame = kv.Value;
+
 				// Setup the tile
 				MetroTile mt = new MetroTile();
 				mt.Parent = panel1;
 				mt.Size = new Size(128, 116);
 				mt.Location = new Point(mtX, mtY);
 				mt.ContextMenuStrip = metroContextMenu1;
-
-				// grab a random style
-				if (usedStyles.Count == 11) {
-					usedStyles.Clear();
-				}
-				var style = (MetroColorStyle)random.Next(3, 14);
-				while (usedStyles.Contains(style)) {
-					style = (MetroColorStyle)random.Next(3, 14);
-				}
-				usedStyles.Add(style);
-				mt.Style = style;
-
+				mt.Style = (MetroColorStyle)random.Next(4, 14);
 				mt.Visible = false;
 				mt.Theme = MetroThemeStyle.Light;
 				mt.Click += (s, e) => {
@@ -149,6 +146,8 @@ namespace CustomGamesBrowser {
 					}
 				};
 
+				htmlToolTip1.SetToolTip(mt, "Left-click to open " + customGame.name + "'s Workshop page. Right-click for more options.<p>" + "Last updated: " + customGame.last_updated_time + "</p>");
+
 				// setup the spinner
 				MetroProgressSpinner ps = new MetroProgressSpinner();
 				ps.Parent = mt;
@@ -158,8 +157,8 @@ namespace CustomGamesBrowser {
 				ps.Location = new Point(44, 38);
 				ps.Visible = false;
 
+				// prepare for next iteration
 				mtX += 132;
-
 				if (count % 5 == 0) {
 					// new row
 					mtX = 4;
@@ -168,22 +167,19 @@ namespace CustomGamesBrowser {
 
 				panel1.Controls.Add(mt);
 
-				var tile = mt;
-				var spinner = ps;
-				customGame.defaultStyle = tile.Style;
-
-				customGame.tile = tile;
-				customGame.spinner = spinner;
-				customGame.page = totalPages;
+				customGame.defaultStyle = mt.Style;
+				customGame.tile = mt;
+				customGame.spinner = ps;
 				try {
 					customGame.retrieveWorkshopImage();
 				} catch (Exception ex) {
 					customGame.initTile();
 				}
+				customGame.count = count;
 				count++;
+				customGame.initTile();
+				customGame.displaySize();
 			}
-
-			changePage(1);
 		}
 
 		public void fixButton() {
@@ -242,33 +238,13 @@ namespace CustomGamesBrowser {
 			}*/
 		}
 
-		private void changePage(int currPage) {
-			int count = 1;
-			foreach (var kv in customGames) {
-				var cg = kv.Value;
-				if (cg.page == currPage) {
-					cg.count = count;
-					cg.initTile();
-					count++;
-				}
-
-			}
-			for (int i = count; i <= NUM_TILES; i++) {
-				var tile = (MetroTile)panel1.Controls["mt" + i];
-				var spinner = (MetroProgressSpinner)tile.Controls["ps" + i];
-				tile.Visible = false;
-				spinner.Visible = false;
-			}
-
-		}
-
 		private void openVPKToolStripMenuItem_Click(object sender, EventArgs e) {
 			ToolStripMenuItem item = (ToolStripMenuItem)sender;
 			var owner = (ContextMenuStrip)item.Owner;
 			MetroTile tile = (MetroTile)(owner.SourceControl);
 			foreach (var kv in customGames) {
 				var cg = kv.Value;
-				if (cg.page == currPage && tile == cg.tile) {
+				if (tile == cg.tile) {
 					Process.Start(cg.vpk);
 					break;
 				}
@@ -280,16 +256,24 @@ namespace CustomGamesBrowser {
 		}
 
 		private void refreshBtn_Click(object sender, EventArgs e) {
-			panel1.AutoScrollPosition = new Point(0, 0);
-			//panel1.AutoScrollPosition.
+			//panel1.AutoScrollPosition = new Point(0, 0);
+			panel1.VerticalScroll.Value = 0;
+
 			foreach (var kv in customGames) {
 				var cg = kv.Value;
 				cg.tile.Dispose();
 				cg.spinner.Dispose();
 			}
-			retrieveCustomGames();
-			deserializeSettings();
-			initCustomGameBrowser();
+
+			Timer t = new Timer();
+			t.Interval = 100;
+			t.Tick += (s2, e2) => {
+				t.Stop();
+				retrieveCustomGames();
+				deserializeSettings();
+				initCustomGameBrowser();
+			};
+			t.Start();
 		}
 
 		private void deleteToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -299,7 +283,7 @@ namespace CustomGamesBrowser {
 			CustomGame customGame = null;
 			foreach (var kv in customGames) {
 				var cg = kv.Value;
-				if (cg.page == currPage && tile == cg.tile) {
+				if (tile == cg.tile) {
 					customGame = cg;
 					break;
 				}
@@ -316,6 +300,21 @@ namespace CustomGamesBrowser {
 				Directory.Delete(customGame.installationDir, true);
 			}
 			refreshBtn_Click(null, null);
+		}
+
+		private void changelogToolStripMenuItem_Click(object sender, EventArgs e) {
+			ToolStripMenuItem item = (ToolStripMenuItem)sender;
+			var owner = (ContextMenuStrip)item.Owner;
+			MetroTile tile = (MetroTile)(owner.SourceControl);
+			CustomGame customGame = null;
+			foreach (var kv in customGames) {
+				var cg = kv.Value;
+				if (tile == cg.tile) {
+					customGame = cg;
+					break;
+				}
+			}
+			Process.Start(customGame.changelogUrl);
 		}
 	}
 }

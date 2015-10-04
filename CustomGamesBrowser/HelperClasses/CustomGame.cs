@@ -22,7 +22,8 @@ namespace CustomGamesBrowser {
 		public MetroProgressSpinner spinner;
 		public int page;
 		public string name;
-		public string last_updated_time;
+		public string last_updated_time = "Not available";
+		public string changelogUrl;
 		public MetroColorStyle defaultStyle;
 		public string fileFriendlyName;
 		public string workshopImagePath;
@@ -30,7 +31,7 @@ namespace CustomGamesBrowser {
 		public bool doneRetrieving;
 		public MainForm mainForm;
 		public int count;
-		public long size;
+		public double size;
 
 		// settings
 		public int WorkshopImgSizeOnWeb;
@@ -42,6 +43,7 @@ namespace CustomGamesBrowser {
 			workshopID = installationDir.Substring(installationDir.LastIndexOf('\\')+1);
 			url = "http://steamcommunity.com/sharedfiles/filedetails/?id=" + workshopID;
 			workshopImagePath = Path.Combine("Thumbnails", workshopID + ".jpg");
+			changelogUrl = "http://steamcommunity.com/sharedfiles/filedetails/changelog/" + workshopID;
 
 			var gameFiles = Directory.GetFiles(installationDir);
 			foreach (var file in gameFiles) {
@@ -116,7 +118,6 @@ namespace CustomGamesBrowser {
 							break;
 						}
 					}
-
 				}
 			};
 			bw.RunWorkerCompleted += (s, e) => {
@@ -132,9 +133,7 @@ namespace CustomGamesBrowser {
 						initTile();
 					}
 				}
-
 			};
-			//bw.
 			bw.RunWorkerAsync();
 		}
 
@@ -153,10 +152,6 @@ namespace CustomGamesBrowser {
         }
 
 		internal void initTile() {
-			if (mainForm.currPage != page) {
-				return;
-			}
-
 			tile.Text = name;
 			tile.Visible = true;
 
@@ -173,8 +168,6 @@ namespace CustomGamesBrowser {
 				}
 			}
 
-			displaySize();
-
 			Timer timer = new Timer();
 			timer.Interval = 100;
 			timer.Tick += (s, e) => {
@@ -184,17 +177,19 @@ namespace CustomGamesBrowser {
 			timer.Start();
 		}
 
-		private void displaySize() {
+		public void displaySize() {
 			var sizeWorker = new BackgroundWorker();
 			string sizeStr = "";
 			sizeWorker.DoWork += (s, e) => {
-				double size = (Util.GetDirectorySize(installationDir) / 1024.0) / 1024.0;
+				var size = Util.GetDirectorySize(installationDir) / 1024.0 / 1024.0;
 				size = Math.Round(size, 1);
+				this.size = size;
 				sizeStr = size.ToString();
+				//Debug.WriteLine("size of " + name + ": " + size);
 			};
 
 			sizeWorker.RunWorkerCompleted += (s, e) => {
-				mainForm.htmlToolTip1.SetToolTip(tile, "(" + sizeStr + " MB). Left-click to open " + name + "'s Workshop page. Right-click for more options.");
+				mainForm.htmlToolTip1.SetToolTip(tile, "(<b>" + sizeStr + " MB</b>). Left-click to open " + name + "'s Workshop page. Right-click for more options.<p>" + "Last updated: " + last_updated_time + "</p>");
 			};
 			sizeWorker.RunWorkerAsync();
 		}
