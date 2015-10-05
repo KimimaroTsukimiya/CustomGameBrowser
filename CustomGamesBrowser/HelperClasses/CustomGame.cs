@@ -25,7 +25,6 @@ namespace CustomGamesBrowser {
 		public int page,
 			count;
 		public double size;
-		public CustomGameBrowser cgb;
 		public MainForm mainForm;
 		public Image workshopImage;
 		public MetroTile tile;
@@ -36,9 +35,8 @@ namespace CustomGamesBrowser {
 		public int WorkshopImgSizeOnWeb;
 		public KeyValue addonKV;
 
-		public CustomGame(CustomGameBrowser cgb, string installationDir) {
-			this.cgb = cgb;
-			mainForm = cgb.mainForm;
+		public CustomGame(MainForm mainForm, string installationDir) {
+			this.mainForm = mainForm;
 			this.installationDir = installationDir;
 			workshopID = installationDir.Substring(installationDir.LastIndexOf('\\')+1);
 			url = "http://steamcommunity.com/sharedfiles/filedetails/?id=" + workshopID;

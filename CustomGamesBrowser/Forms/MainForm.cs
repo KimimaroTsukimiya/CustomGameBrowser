@@ -13,29 +13,34 @@ using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
 	public partial class MainForm : MetroForm {
-		public CustomGameBrowser cgb;
-        public Dictionary<string, CustomGame> installedCustomGames;
+		public string dotaDir = "";
+		public string installedCustomsDir = "";
+		public string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+		public Dictionary<string, CustomGame> installedCustomGames = new Dictionary<string, CustomGame>();
 		public Random random = new Random();
+		public Updater updater;
 
-		public MainForm(CustomGameBrowser cgb) {
+		public MainForm() {
 			InitializeComponent();
-			this.cgb = cgb;
-			installedCustomGames = cgb.installedCustomGames;
 
-			versionLink.Text = "v" + cgb.version;
+			// change version so it matches our specs
+			version = version.Substring(0, version.LastIndexOf('.'));
+			versionLink.Text = "v" + version;
 
-			this.Shown += (s, e) => {
-				initMainPanel();
-			};
-
-			this.FormClosed += (s, e) => {
-				cgb.serializeSettings();
-			};
-
+			setupHooks();
 
 			if (!Directory.Exists("Thumbnails")) {
 				Directory.CreateDirectory("Thumbnails");
 			}
+
+			// check for updates
+			updater = new Updater(this);
+
+			// get the dota dir
+			retrieveDotaDir();
+
+			installedCustomsDir = dotaDir.Substring(0, dotaDir.IndexOf("steamapps") + "steamapps".Length);
+			installedCustomsDir = Path.Combine(installedCustomsDir, "workshop", "content", "570");
 
 			var sizeCalc = Util.CreateTimer(200, (timer) => {
 				double size = 0;
@@ -47,10 +52,78 @@ namespace CustomGamesBrowser {
 			});
 		}
 
+		private void setupHooks() {
+			this.Shown += (s, e) => {
+				retrieveInstalledCustomGames();
+				deserializeSettings();
+				initMainPanel();
+			};
+
+			this.FormClosed += (s, e) => {
+				serializeSettings();
+			};
+		}
+
+		public void retrieveInstalledCustomGames() {
+			installedCustomGames.Clear();
+			var customGameDirs = Directory.GetDirectories(installedCustomsDir);
+			foreach (var customGameDir in customGameDirs) {
+				var customGame = new CustomGame(this, customGameDir);
+
+				if (customGame.vpk == null) {
+					continue;
+				}
+
+				installedCustomGames.Add(customGame.workshopID, customGame);
+			}
+		}
+
+		private void retrieveDotaDir() {
+			// start process of retrieving dota dir
+			dotaDir = Settings.Default.DotaDir;
+
+			if (dotaDir == "") {
+				// user opened this application for the first time ever.
+				// try to auto-get the dir
+				dotaDir = Util.GetDotaDir();
+
+				DialogResult dr = DialogResult.No;
+				if (dotaDir != "") {
+					// first run of modkit on this computer.
+					dr = MetroMessageBox.Show(this,
+						"Dota directory has been set to: " + dotaDir + ". Is this correct?",
+						"Dota Directory",
+						MessageBoxButtons.YesNo,
+						MessageBoxIcon.Information);
+				}
+
+				if (dr == DialogResult.No) {
+					FolderBrowserDialog fbd = new FolderBrowserDialog();
+					fbd.Description = "Dota 2 directory (i.e. 'dota 2 beta')";
+					var dr2 = fbd.ShowDialog();
+
+					if (dr2 != DialogResult.OK) {
+						MetroMessageBox.Show(this, "No folder selected. Exiting.",
+							"Error",
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Error);
+
+						Application.Exit();
+						return;
+					}
+					string p = fbd.SelectedPath;
+					dotaDir = p;
+				}
+			}
+
+			Settings.Default.DotaDir = dotaDir;
+			Settings.Default.Save();
+		}
+
 		private void initMainPanel() {
 			totalSizeLabel.Text = "Total size: 0 MB";
 			int count = 1, tileX = 4, tileY = 4;
-			foreach (var kv in cgb.installedCustomGames) {
+			foreach (var kv in installedCustomGames) {
 				var customGame = kv.Value;
 				MetroTile mt;
 				MetroProgressSpinner ps;
@@ -76,13 +149,13 @@ namespace CustomGamesBrowser {
 		private void CreateMainPanelTile(Point location, out MetroTile out_mt, out MetroProgressSpinner out_ps) {
 			var mt = new MetroTile();
 			mt.Parent = mainPanel;
-			//mainPanel.Controls.Add(mt); // is this needed when the parent is already set?
 			mt.Location = location;
 			mt.ContextMenuStrip = metroContextMenu1;
 			mt.Style = (MetroColorStyle)random.Next(4, 14);
 			mt.Theme = MetroThemeStyle.Light;
 			mt.Size = new Size(128, 116);
 			mt.Click += (s, e) => {
+				fixButton();
 				foreach (var kv2 in installedCustomGames) {
 					var cg = kv2.Value;
 					if (mt == cg.tile) {
@@ -122,7 +195,7 @@ namespace CustomGamesBrowser {
 		}
 
 		private void versionLink_Click(object sender, EventArgs e) {
-			Process.Start("https://github.com/stephenfournier/CustomGameBrowser/releases/tag/v" + cgb.version);
+			Process.Start("https://github.com/stephenfournier/CustomGameBrowser/releases/tag/v" + version);
 		}
 
 		private void refreshBtn_Click(object sender, EventArgs e) {
@@ -137,9 +210,7 @@ namespace CustomGamesBrowser {
 
 			Util.CreateTimer(100, (timer) => {
 				timer.Stop();
-				cgb.retrieveInstalledCustomGames();
-				cgb.deserializeSettings();
-				initMainPanel();
+				this.OnShown(null);
 			});
 		}
 
@@ -177,5 +248,35 @@ namespace CustomGamesBrowser {
 				}
 			}
 		}
+
+		#region serializing functions
+
+		public void serializeSettings() {
+			var root = new KeyValue("InstalledAddons");
+			foreach (var kv in installedCustomGames) {
+				var cg = kv.Value;
+				cg.serializeSettings();
+				root.AddChild(cg.addonKV);
+			}
+			Settings.Default.InstalledAddonsKV = root.ToString();
+
+			Settings.Default.Save();
+		}
+
+		public void deserializeSettings() {
+			var installedAddonsKV = Settings.Default.InstalledAddonsKV;
+			if (installedAddonsKV == null || installedAddonsKV == "") {
+				return;
+			}
+			var root = KVParser.KV1.Parse(installedAddonsKV);
+			foreach (var kv in root.Children) {
+				var workshopID = kv.Key;
+				if (installedCustomGames.ContainsKey(workshopID)) {
+					installedCustomGames[workshopID].deserializeSettings(kv);
+				}
+			}
+		}
+		#endregion
+
 	}
 }

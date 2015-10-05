@@ -11,6 +11,44 @@ using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
 	public static class Util {
+		public static string logPath = Path.Combine("debug_log.txt");
+
+		public static void Log(string text) {
+			try {
+				// if log file is over xxx KB, delete.
+				if (File.Exists(logPath) && new FileInfo(logPath).Length > 1024 * 400) {
+					File.Delete(logPath);
+				}
+
+				if (!File.Exists(logPath)) {
+					File.Create(logPath).Close();
+				}
+
+				StringBuilder logText = new StringBuilder(File.ReadAllText(logPath));
+				if (logText.Length == 0) {
+					logText.AppendLine("REPORT THIS TO https://github.com/stephenfournier/CustomGameBrowser/issues/new IF CRASHES OCCUR.\n");
+				}
+
+				logText.AppendLine("\n\nNEW ENTRY: " + DateTime.Now.ToShortDateString() + ", " + DateTime.Now.ToLongTimeString());
+				logText.AppendLine(text);
+
+				File.WriteAllText(logPath, logText.ToString());
+			} catch (Exception) { }
+		}
+
+		internal static void LogException(Exception ex) {
+			StringBuilder txt = new StringBuilder();
+			txt.AppendLine("ex.toString(): " + ex.ToString());
+			// toString() includes the Message and StackTrace.
+			//txt.AppendLine("Message: " + ex.Message);
+			//txt.AppendLine("StackTrace: " + ex.StackTrace);
+			if (ex.InnerException != null) {
+				txt.AppendLine("InnerException.toString(): " + ex.InnerException.ToString());
+			}
+
+			Log(txt.ToString());
+		}
+
 		// useful with dynamic types
 		public static bool IsPropertyExist(dynamic settings, string name) {
 			return settings.GetType().GetProperty(name) != null;

@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 
 namespace CustomGamesBrowser {
 	public class Updater {
-		CustomGameBrowser cgb;
+		MainForm mainForm;
 		public string version;
 		public string url = "";
 		public string newVers = "";
 		public bool newVersFound = false;
 		public string releases_page_source;
 
-		public Updater(CustomGameBrowser cgb) {
-			this.cgb = cgb;
-			version = cgb.version;
+		public Updater(MainForm mainForm) {
+			this.mainForm = mainForm;
+			version = mainForm.version;
 
 			checkForUpdates();
 		}
@@ -76,7 +76,7 @@ namespace CustomGamesBrowser {
 					return;
 				}
 
-				UpdateInfoForm uif = new UpdateInfoForm(cgb, this);
+				UpdateInfoForm uif = new UpdateInfoForm(mainForm);
 				uif.ShowDialog();
 			};
 

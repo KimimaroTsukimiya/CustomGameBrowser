@@ -70,7 +70,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomGameBrowser.cs" />
     <Compile Include="HelperClasses\CustomGame.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
