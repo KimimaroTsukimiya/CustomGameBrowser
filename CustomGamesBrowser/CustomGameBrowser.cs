@@ -23,6 +23,8 @@ namespace CustomGamesBrowser {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
+			mainForm = new MainForm(this);
+
 			// change version so it matches our specs
 			version = version.Substring(0, version.LastIndexOf('.'));
 
@@ -39,10 +41,7 @@ namespace CustomGamesBrowser {
 			retrieveInstalledCustomGames();
 			deserializeSettings();
 
-			// Bring up the main form
-			mainForm = new MainForm(this);
 			Application.Run(mainForm);
-
 		}
 
 		public void retrieveInstalledCustomGames() {

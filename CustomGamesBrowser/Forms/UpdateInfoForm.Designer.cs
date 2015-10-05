@@ -36,7 +36,7 @@
 			// 
 			this.dontUpdateBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.dontUpdateBtn.FontSize = MetroFramework.MetroButtonSize.Medium;
-			this.dontUpdateBtn.Location = new System.Drawing.Point(217, 345);
+			this.dontUpdateBtn.Location = new System.Drawing.Point(216, 344);
 			this.dontUpdateBtn.Margin = new System.Windows.Forms.Padding(4);
 			this.dontUpdateBtn.Name = "dontUpdateBtn";
 			this.dontUpdateBtn.Size = new System.Drawing.Size(67, 40);
@@ -44,20 +44,22 @@
 			this.dontUpdateBtn.TabStop = false;
 			this.dontUpdateBtn.Text = "Cancel";
 			this.dontUpdateBtn.UseSelectable = true;
+			this.dontUpdateBtn.Click += new System.EventHandler(this.dontUpdateBtn_Click);
 			// 
 			// updateBtn
 			// 
 			this.updateBtn.FontSize = MetroFramework.MetroButtonSize.Medium;
-			this.updateBtn.Location = new System.Drawing.Point(117, 345);
+			this.updateBtn.Location = new System.Drawing.Point(120, 344);
 			this.updateBtn.Margin = new System.Windows.Forms.Padding(4);
 			this.updateBtn.Name = "updateBtn";
-			this.updateBtn.Size = new System.Drawing.Size(95, 40);
+			this.updateBtn.Size = new System.Drawing.Size(92, 40);
 			this.updateBtn.Style = MetroFramework.MetroColorStyle.Green;
 			this.updateBtn.TabIndex = 29;
 			this.updateBtn.TabStop = false;
 			this.updateBtn.Text = "Update!";
 			this.updateBtn.UseSelectable = true;
 			this.updateBtn.UseStyleColors = true;
+			this.updateBtn.Click += new System.EventHandler(this.updateBtn_Click);
 			// 
 			// progressLabel
 			// 

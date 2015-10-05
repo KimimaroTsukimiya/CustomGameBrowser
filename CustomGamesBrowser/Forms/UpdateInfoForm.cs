@@ -25,7 +25,7 @@ namespace CustomGamesBrowser {
 			InitializeComponent();
 
 			this.Text = "Update Available! (v" + updater.newVers + ")";
-			changelogTextBox.Text = "CHANGELOG:\n" + changelog;
+			changelogTextBox.Text = "CHANGELOG:\r\n" + changelog;
 
 		}
 		private string getChangelog() {

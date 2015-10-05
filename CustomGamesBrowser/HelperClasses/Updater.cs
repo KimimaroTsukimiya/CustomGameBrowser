@@ -77,6 +77,7 @@ namespace CustomGamesBrowser {
 				}
 
 				UpdateInfoForm uif = new UpdateInfoForm(cgb, this);
+				uif.Parent = cgb.mainForm;
 				uif.ShowDialog();
 			};
 
