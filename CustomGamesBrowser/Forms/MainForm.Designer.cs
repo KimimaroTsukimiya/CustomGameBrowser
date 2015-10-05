@@ -31,10 +31,10 @@
 			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.dummyBtn = new MetroFramework.Controls.MetroRadioButton();
 			this.versionLink = new MetroFramework.Controls.MetroLink();
-			this.panel1 = new MetroFramework.Controls.MetroPanel();
+			this.mainPanel = new MetroFramework.Controls.MetroPanel();
 			this.htmlToolTip1 = new MetroFramework.Drawing.Html.HtmlToolTip();
 			this.refreshBtn = new System.Windows.Forms.PictureBox();
-			this.totalSizeLabel1 = new MetroFramework.Controls.MetroLabel();
+			this.totalSizeLabel = new MetroFramework.Controls.MetroLabel();
 			this.metroContextMenu1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.refreshBtn)).BeginInit();
 			this.SuspendLayout();
@@ -99,20 +99,20 @@
 			// 
 			// panel1
 			// 
-			this.panel1.AutoScroll = true;
-			this.panel1.HorizontalScrollbar = true;
-			this.panel1.HorizontalScrollbarBarColor = true;
-			this.panel1.HorizontalScrollbarHighlightOnWheel = false;
-			this.panel1.HorizontalScrollbarSize = 10;
-			this.panel1.Location = new System.Drawing.Point(4, 56);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(676, 616);
-			this.panel1.TabIndex = 40;
-			this.panel1.Theme = MetroFramework.MetroThemeStyle.Light;
-			this.panel1.VerticalScrollbar = true;
-			this.panel1.VerticalScrollbarBarColor = true;
-			this.panel1.VerticalScrollbarHighlightOnWheel = true;
-			this.panel1.VerticalScrollbarSize = 10;
+			this.mainPanel.AutoScroll = true;
+			this.mainPanel.HorizontalScrollbar = true;
+			this.mainPanel.HorizontalScrollbarBarColor = true;
+			this.mainPanel.HorizontalScrollbarHighlightOnWheel = false;
+			this.mainPanel.HorizontalScrollbarSize = 10;
+			this.mainPanel.Location = new System.Drawing.Point(4, 56);
+			this.mainPanel.Name = "panel1";
+			this.mainPanel.Size = new System.Drawing.Size(676, 616);
+			this.mainPanel.TabIndex = 40;
+			this.mainPanel.Theme = MetroFramework.MetroThemeStyle.Light;
+			this.mainPanel.VerticalScrollbar = true;
+			this.mainPanel.VerticalScrollbarBarColor = true;
+			this.mainPanel.VerticalScrollbarHighlightOnWheel = true;
+			this.mainPanel.VerticalScrollbarSize = 10;
 			// 
 			// htmlToolTip1
 			// 
@@ -136,29 +136,30 @@
 			// 
 			// totalSizeLabel1
 			// 
-			this.totalSizeLabel1.AutoSize = true;
-			this.totalSizeLabel1.FontSize = MetroFramework.MetroLabelSize.Tall;
-			this.totalSizeLabel1.FontWeight = MetroFramework.MetroLabelWeight.Regular;
-			this.totalSizeLabel1.Location = new System.Drawing.Point(256, 672);
-			this.totalSizeLabel1.Name = "totalSizeLabel1";
-			this.totalSizeLabel1.Size = new System.Drawing.Size(87, 25);
-			this.totalSizeLabel1.TabIndex = 43;
-			this.totalSizeLabel1.Text = "Total size:";
+			this.totalSizeLabel.AutoSize = true;
+			this.totalSizeLabel.FontSize = MetroFramework.MetroLabelSize.Tall;
+			this.totalSizeLabel.FontWeight = MetroFramework.MetroLabelWeight.Regular;
+			this.totalSizeLabel.Location = new System.Drawing.Point(256, 672);
+			this.totalSizeLabel.Name = "totalSizeLabel1";
+			this.totalSizeLabel.Size = new System.Drawing.Size(87, 25);
+			this.totalSizeLabel.TabIndex = 43;
+			this.totalSizeLabel.Text = "Total size:";
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(686, 698);
-			this.Controls.Add(this.totalSizeLabel1);
+			this.Controls.Add(this.totalSizeLabel);
 			this.Controls.Add(this.refreshBtn);
-			this.Controls.Add(this.panel1);
+			this.Controls.Add(this.mainPanel);
 			this.Controls.Add(this.versionLink);
 			this.Controls.Add(this.dummyBtn);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.Resizable = false;
+			this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.Style = MetroFramework.MetroColorStyle.Red;
 			this.Text = "Installed Custom Games";
@@ -174,12 +175,12 @@
 		private MetroFramework.Controls.MetroContextMenu metroContextMenu1;
 		private System.Windows.Forms.ToolStripMenuItem openVPKToolStripMenuItem;
 		private MetroFramework.Controls.MetroLink versionLink;
-		private MetroFramework.Controls.MetroPanel panel1;
+		private MetroFramework.Controls.MetroPanel mainPanel;
 		public MetroFramework.Drawing.Html.HtmlToolTip htmlToolTip1;
 		private System.Windows.Forms.PictureBox refreshBtn;
 		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem changelogToolStripMenuItem;
-		public MetroFramework.Controls.MetroLabel totalSizeLabel1;
+		public MetroFramework.Controls.MetroLabel totalSizeLabel;
 	}
 }
 

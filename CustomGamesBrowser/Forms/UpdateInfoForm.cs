@@ -11,12 +11,12 @@ using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
 	public partial class UpdateInfoForm : MetroForm {
-		MainForm mainForm;
+		CustomGameBrowser cgb;
 		Updater updater;
 		string changelog = "";
 
-		public UpdateInfoForm(MainForm mainForm, Updater updater) {
-			this.mainForm = mainForm;
+		public UpdateInfoForm(CustomGameBrowser cgb, Updater updater) {
+			this.cgb = cgb;
 			this.updater = updater;
 
 			// parse out the changelog from releases_page_source.

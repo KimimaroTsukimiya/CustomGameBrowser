@@ -1,15 +1,64 @@
-﻿using System;
+﻿using MetroFramework.Controls;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
 	public static class Util {
+		// useful with dynamic types
+		public static bool IsPropertyExist(dynamic settings, string name) {
+			return settings.GetType().GetProperty(name) != null;
+		}
 
-		public static string incrementVers(string vers, int add) {
+		public static object GetCallingControl(dynamic item, object dummy) {
+			if (!IsPropertyExist(item, "Owner")) {
+				Debug.WriteLine("Owner doesn't exit!");
+				return null;
+			}
+
+			Type type = dummy.GetType();
+			var owner = (ContextMenuStrip)item.Owner;
+			return Convert.ChangeType(owner.SourceControl, type);
+		}
+
+		public static Timer CreateTimer(int interval, Action<Timer> onTick) {
+			Timer timer = new Timer();
+			timer.Interval = interval;
+			timer.Tick += (s, e) => {
+				onTick(timer);
+			};
+			timer.Start();
+			return timer;
+		}
+
+		public static void Delay(int delay, Action action) {
+			Timer timer = new Timer();
+			timer.Interval = delay;
+			timer.Tick += (s, e) => {
+				timer.Stop();
+				action();
+			};
+			timer.Start();
+		}
+
+		public static Exception TryDeleteFile(string filePath) {
+			try {
+				if (File.Exists(filePath)) {
+					File.Delete(filePath);
+				}
+			} catch (Exception ex) {
+				return ex;
+			}
+			return null;
+		}
+
+		public static string IncrementVers(string vers, int add) {
 			// check for new Vers
 			string[] numStrs = vers.Split('.');
 			string newVers = "";
@@ -58,7 +107,7 @@ namespace CustomGamesBrowser {
 			return totalBytes;
 		}
 
-		public static string getDotaDir() {
+		public static string GetDotaDir() {
 			string dotaDir = "";
 			// Auto-find the dota path.
 			Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.LocalMachine;
@@ -69,9 +118,7 @@ namespace CustomGamesBrowser {
 					string dir = regKey.GetValue("InstallLocation").ToString();
 					dotaDir = dir;
 				}
-			} catch (Exception) {
-
-			}
+			} catch (Exception) { }
 
 			if (dotaDir != "") {
 				return dotaDir;
@@ -99,11 +146,10 @@ namespace CustomGamesBrowser {
 			} else if (Directory.Exists(p2)) {
 				dotaDir = p2;
 			}
-
 			return dotaDir;
 		}
 
-		public static bool hasSameDrives(string path1, string path2) {
+		public static bool HasSameDrives(string path1, string path2) {
 			// D2ModKit must be ran from the same drive as dota or else things will break.
 			char path1Drive = path1[0];
 			char path2Drive = path2[0];

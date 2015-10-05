@@ -11,16 +11,18 @@ using System.Threading.Tasks;
 
 namespace CustomGamesBrowser {
 	public class Updater {
-		MainForm mainForm;
+		CustomGameBrowser cgb;
 		public string version;
 		public string url = "";
 		public string newVers = "";
 		public bool newVersFound = false;
 		public string releases_page_source;
 
-		public Updater(MainForm mainForm) {
-			this.mainForm = mainForm;
-			version = mainForm.version;
+		public Updater(CustomGameBrowser cgb) {
+			this.cgb = cgb;
+			version = cgb.version;
+
+			checkForUpdates();
 		}
 
 		public void checkForUpdates() {
@@ -43,7 +45,7 @@ namespace CustomGamesBrowser {
 				int count = 1;
 				int j = 0;
 				while (true) {
-					newVers = Util.incrementVers(version, count + j);
+					newVers = Util.IncrementVers(version, count + j);
 					url = "https://github.com/stephenfournier/CustomGameBrowser/releases/download/v";
 					url += newVers + "/CustomGameBrowser.zip";
 					WebClient wc = new WebClient();
@@ -63,7 +65,7 @@ namespace CustomGamesBrowser {
 					count += j + 1;
 					j = 0;
 				}
-				newVers = Util.incrementVers(version, count - 1);
+				newVers = Util.IncrementVers(version, count - 1);
 				url = "https://github.com/stephenfournier/CustomGameBrowser/releases/download/v";
 				url += newVers + "/CustomGameBrowser.zip";
 			};
@@ -74,7 +76,7 @@ namespace CustomGamesBrowser {
 					return;
 				}
 
-				UpdateInfoForm uif = new UpdateInfoForm(mainForm, this);
+				UpdateInfoForm uif = new UpdateInfoForm(cgb, this);
 				uif.ShowDialog();
 			};
 

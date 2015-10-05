@@ -12,33 +12,33 @@ using System.Windows.Forms;
 
 namespace CustomGamesBrowser {
 	public class CustomGame {
-		public string installationDir;
-		public string workshopID;
-		public string url;
+		public string installationDir,
+			workshopID,
+			url,
+			vpk,
+			publish_data,
+			name,
+			last_updated_time = "Not available",
+			fileFriendlyName,
+			workshopImagePath,
+			changelogUrl;
+		public int page,
+			count;
+		public double size;
+		public CustomGameBrowser cgb;
+		public MainForm mainForm;
 		public Image workshopImage;
-		public string vpk;
-		public string publish_data;
 		public MetroTile tile;
 		public MetroProgressSpinner spinner;
-		public int page;
-		public string name;
-		public string last_updated_time = "Not available";
-		public string changelogUrl;
 		public MetroColorStyle defaultStyle;
-		public string fileFriendlyName;
-		public string workshopImagePath;
-		public bool retrievingImage;
-		public bool doneRetrieving;
-		public MainForm mainForm;
-		public int count;
-		public double size;
 
 		// settings
 		public int WorkshopImgSizeOnWeb;
 		public KeyValue addonKV;
 
-		public CustomGame(MainForm mainForm, string installationDir) {
-			this.mainForm = mainForm;
+		public CustomGame(CustomGameBrowser cgb, string installationDir) {
+			this.cgb = cgb;
+			mainForm = cgb.mainForm;
 			this.installationDir = installationDir;
 			workshopID = installationDir.Substring(installationDir.LastIndexOf('\\')+1);
 			url = "http://steamcommunity.com/sharedfiles/filedetails/?id=" + workshopID;
@@ -70,13 +70,7 @@ namespace CustomGamesBrowser {
 		}
 
 		public void retrieveWorkshopImage() {
-			if (File.Exists(workshopImagePath) && new FileInfo(workshopImagePath).Length > 50) {
-				workshopImage = (Image)new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
-				initTile();
-			}
-
 			BackgroundWorker bw = new BackgroundWorker();
-			retrievingImage = true;
 			var source = "";
 			bw.DoWork += (s, e) => {
 				using (WebClient wc = new WebClient()) {
@@ -97,10 +91,9 @@ namespace CustomGamesBrowser {
 							bool download = false;
 							if (File.Exists(workshopImagePath)) {
 								if (totalBytes != WorkshopImgSizeOnWeb) {
-									File.Delete(workshopImagePath);
 									download = true;
 								} else {
-									//Debug.WriteLine("Same image. Not downloading image for " + name);
+									Debug.WriteLine("Same image. Not downloading.");
 								}
 							} else {
 								download = true;
@@ -110,9 +103,10 @@ namespace CustomGamesBrowser {
 								using (MemoryStream ms = new MemoryStream(byteArr)) {
 									var im = Image.FromStream(ms);
 									im = new Bitmap(im, new Size(128, 128));
-									im.Save(workshopImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
-									WorkshopImgSizeOnWeb = byteArr.Length;
-									//Debug.WriteLine("Saved image for: " + workshopImagePath);
+									if (Util.TryDeleteFile(workshopImagePath) == null) {
+										im.Save(workshopImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+										WorkshopImgSizeOnWeb = byteArr.Length;
+									}
 								}
 							}
 							break;
@@ -120,28 +114,47 @@ namespace CustomGamesBrowser {
 					}
 				}
 			};
+
 			bw.RunWorkerCompleted += (s, e) => {
-				doneRetrieving = true;
-				retrievingImage = false;
 				spinner.Visible = false;
 
 				if (File.Exists(workshopImagePath)) {
-					if (!(new FileInfo(workshopImagePath).Length > 50)) {
-						File.Delete(workshopImagePath);
-					} else {
-						workshopImage = new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
-						initTile();
-					}
+					workshopImage = new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
+					// set image
+					tile.UseTileImage = true;
+					tile.TileImage = workshopImage;
 				}
+
+				Util.CreateTimer(100, (timer) => {
+					timer.Stop();
+					tile.Refresh();
+				});
 			};
+
 			bw.RunWorkerAsync();
+		}
+
+		internal void initTile() {
+			tile.Text = name;
+
+			if (File.Exists(workshopImagePath) && new FileInfo(workshopImagePath).Length > 50) {
+				workshopImage = new Bitmap(Image.FromFile(workshopImagePath), tile.Size);
+				// set image
+				tile.UseTileImage = true;
+				tile.TileImage = workshopImage;
+				// still have to continue code at this point. what if the author updated the workshop image?
+			} else {
+				spinner.Visible = true;
+			}
+
+			retrieveWorkshopImage();
 		}
 
 		internal void deserializeSettings(KeyValue root) {
 			foreach (var kv in root.Children) {
 				if (kv.Key == "WorkshopImgSizeOnWeb") {
 					WorkshopImgSizeOnWeb = kv.GetInt();
-                }
+				}
 			}
 		}
 		internal void serializeSettings() {
@@ -149,43 +162,15 @@ namespace CustomGamesBrowser {
 			if (WorkshopImgSizeOnWeb != 0) {
 				addonKV.AddChild(new KeyValue("WorkshopImgSizeOnWeb").Set(WorkshopImgSizeOnWeb));
 			}
-        }
-
-		internal void initTile() {
-			tile.Text = name;
-			tile.Visible = true;
-
-			if (workshopImage != null) {
-				// set image
-				tile.UseTileImage = true;
-				tile.TileImage = workshopImage;
-				//Debug.WriteLine(name = " using own image now.");
-			} else {
-				tile.UseTileImage = false;
-				tile.Style = defaultStyle;
-				if (retrievingImage) {
-					spinner.Visible = true;
-				}
-			}
-
-			Timer timer = new Timer();
-			timer.Interval = 100;
-			timer.Tick += (s, e) => {
-				timer.Stop();
-				tile.Refresh();
-			};
-			timer.Start();
 		}
 
 		public void displaySize() {
 			var sizeWorker = new BackgroundWorker();
 			string sizeStr = "";
 			sizeWorker.DoWork += (s, e) => {
-				var size = Util.GetDirectorySize(installationDir) / 1024.0 / 1024.0;
-				size = Math.Round(size, 1);
+				var size = Util.GetDirectorySize(installationDir)/1024.0/1024.0;
 				this.size = size;
-				sizeStr = size.ToString();
-				//Debug.WriteLine("size of " + name + ": " + size);
+				sizeStr = Math.Round(size, 1).ToString();
 			};
 
 			sizeWorker.RunWorkerCompleted += (s, e) => {
