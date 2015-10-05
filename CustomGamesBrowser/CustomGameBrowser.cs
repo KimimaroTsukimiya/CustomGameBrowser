@@ -88,13 +88,15 @@ namespace CustomGamesBrowser {
 							MessageBoxButtons.OK,
 							MessageBoxIcon.Error);
 
-						Environment.Exit(0);
+						Application.Exit();
 						return;
 					}
 					string p = fbd.SelectedPath;
 					dotaDir = p;
 				}
 			}
+
+			Settings.Default.DotaDir = dotaDir;
 			Settings.Default.Save();
 		}
 
